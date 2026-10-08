@@ -164,7 +164,7 @@ def fs(tamanho):
     return tamanho * ESCALA
 
 
-def id_uc(tabela):
+def id_familia(tabela):
     """Identificador da unidade de consumo: UPA + domicílio + UC."""
     return tabela['COD_UPA'] + tabela['NUM_DOM'] + tabela['NUM_UC']
 
@@ -174,19 +174,19 @@ def id_uc(tabela):
 # ============================================================
 df_despesa = ler_largura_fixa(f'{CAMINHO}/DESPESA_INDIVIDUAL.txt',
                               CAMPOS_DESPESA)
-df_despesa['ID_UC'] = id_uc(df_despesa)
+df_despesa['ID_FAMILIA'] = id_familia(df_despesa)
 
 # UC com acesso: registrou ao menos uma despesa com serviço financeiro
 ucs_com_acesso = set(
     df_despesa.loc[df_despesa['COD_PRODUTO'].isin(CODIGOS_FINANCEIROS),
-                   'ID_UC'])
+                   'ID_FAMILIA'])
 
 df_morador = ler_largura_fixa(f'{CAMINHO}/MORADOR.txt', CAMPOS_MORADOR)
-df_morador['ID_UC'] = id_uc(df_morador)
+df_morador['ID_FAMILIA'] = id_familia(df_morador)
 
 # Unidade de análise: pessoa de referência da UC (COD_INFORMANTE == 1)
 df = df_morador[df_morador['COD_INFORMANTE'] == '1'].copy()
-df['ACESSO_FINANCEIRO'] = (df['ID_UC'].isin(ucs_com_acesso)
+df['ACESSO_FINANCEIRO'] = (df['ID_FAMILIA'].isin(ucs_com_acesso)
                            .map({True: 'Com acesso', False: 'Sem acesso'}))
 
 print(f'UCs com acesso financeiro: {fmt_n(len(ucs_com_acesso))}')
